@@ -29,7 +29,7 @@ func GetConnection() *gorm.DB {
 	}
 	sqlDB.Close()
 
-	dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Los_Angeles",
+	dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=America/Los_Angeles",
 		conf.DbHost,
 		conf.DbUser,
 		conf.DbPassword,
