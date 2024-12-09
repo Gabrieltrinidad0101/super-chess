@@ -2,11 +2,14 @@ package services
 
 import (
 	"backend/src/structs"
+	"backend/src/utils"
 	"net/http"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
 )
+
+var eventBus = utils.GetEventBus()
 
 type PlayerModel interface {
 	Insert(*structs.Player)
@@ -19,11 +22,11 @@ type PlayerModel interface {
 }
 
 type Token interface {
-	CreateToken(*structs.Player) (string, error)
+	CreateToken(id uint) (string, error)
 }
 
-func NewPlayer(playerModel PlayerModel, token Token) ServicePlayer {
-	return ServicePlayer{
+func NewPlayer(playerModel PlayerModel, token Token) *ServicePlayer {
+	return &ServicePlayer{
 		PlayerModel: playerModel,
 		Token:       token,
 	}
@@ -37,6 +40,7 @@ type ServicePlayer struct {
 type Response struct {
 	StatusCode int
 	Message    interface{} `json:"message"`
+	Data       interface{} `json:"data"`
 }
 
 var validate = validator.New()
@@ -45,7 +49,7 @@ func (u *ServicePlayer) Login(player *structs.Player) Response {
 	if err := validate.Struct(player); err != nil {
 		return Response{
 			StatusCode: 402,
-			Message:    "Name or Password  are incorrect",
+			Message:    "Name or Password  are required",
 		}
 	}
 	playerExist := u.Find(player)
@@ -55,8 +59,7 @@ func (u *ServicePlayer) Login(player *structs.Player) Response {
 			Message:    "Name or Password  are incorrect",
 		}
 	}
-	player.Id = playerExist.Id
-	token, error := u.CreateToken(player)
+	token, error := u.CreateToken(playerExist.Id)
 
 	if error != nil {
 		return Response{
@@ -66,17 +69,16 @@ func (u *ServicePlayer) Login(player *structs.Player) Response {
 	}
 
 	return Response{
-		Message:    token,
+		Data:       token,
 		StatusCode: 200,
 	}
-
 }
 
 func (u *ServicePlayer) Register(player *structs.Player) Response {
 	if err := validate.Struct(player); err != nil {
 		return Response{
 			StatusCode: 402,
-			Message:    "Name and Password are requires",
+			Message:    "Name and Password are required",
 		}
 	}
 	playerExist := u.Find(player)
@@ -89,7 +91,7 @@ func (u *ServicePlayer) Register(player *structs.Player) Response {
 
 	u.Insert(player)
 
-	token, error := u.CreateToken(player)
+	token, error := u.CreateToken(player.Id)
 	if error != nil {
 		return Response{
 			Message:    "Error generating the access token please try later",
@@ -98,7 +100,7 @@ func (u *ServicePlayer) Register(player *structs.Player) Response {
 	}
 
 	return Response{
-		Message:    token,
+		Data:       token,
 		StatusCode: 200,
 	}
 
@@ -130,15 +132,15 @@ func (u *ServicePlayer) SetGame(stringPlayerId, stringGameUuid string) Response 
 		return response
 	}
 
-	if stringGameUuid != "" {
-		player := u.PlayerModel.FindById(uint(playerId))
-		if player.GameUuid != "" {
-			return Response{
-				StatusCode: http.StatusBadRequest,
-				Message:    "You are already into game",
-			}
-		}
-	}
+	// if stringGameUuid != "" {
+	// 	player := u.PlayerModel.FindById(uint(playerId))
+	// 	if player.GameUuid != "" {
+	// 		return Response{
+	// 			StatusCode: http.StatusBadRequest,
+	// 			Message:    "You are already into game",
+	// 		}
+	// 	}
+	// }
 	u.PlayerModel.SetGame(uint(playerId), stringGameUuid)
 	return Response{
 		StatusCode: 200,
@@ -160,4 +162,8 @@ func (u *ServicePlayer) Winner(stringPlayerId string) Response {
 		StatusCode: 200,
 		Message:    "OK",
 	}
+}
+
+func Init() {
+
 }

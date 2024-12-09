@@ -15,14 +15,16 @@ type Configuration struct {
 	DbUser     string
 	DbPassword string
 	DbHost     string
+	JwtSecret  string
 }
 
-var c = &Configuration{}
+var c *Configuration
 
 func Enviroments() *Configuration {
 	if c != nil {
 		return c
 	}
+	c = &Configuration{}
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
@@ -35,5 +37,6 @@ func Enviroments() *Configuration {
 	}
 	c.DbPort = int32(port)
 	c.DbUser = os.Getenv("DB_USER")
+
 	return c
 }

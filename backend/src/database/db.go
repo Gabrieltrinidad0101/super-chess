@@ -10,11 +10,10 @@ import (
 
 func GetConnection() *gorm.DB {
 	conf := utils.Enviroments()
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/?charset=utf8mb4&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s port=5432 sslmode=disable TimeZone=America/Los_Angeles",
+		conf.DbHost,
 		conf.DbUser,
 		conf.DbPassword,
-		conf.DbHost,
-		conf.DbPort,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn))
@@ -30,12 +29,12 @@ func GetConnection() *gorm.DB {
 	}
 	sqlDB.Close()
 
-	dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+	dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=America/Los_Angeles",
+		conf.DbHost,
 		conf.DbUser,
 		conf.DbPassword,
-		conf.DbHost,
-		conf.DbPort,
 		conf.DbName,
+		conf.DbPort,
 	)
 
 	gormDB, err := gorm.Open(postgres.Open(dsn))

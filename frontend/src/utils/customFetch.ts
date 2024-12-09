@@ -69,14 +69,14 @@ class CustomFetch {
       const token = localStorage.getItem('token');
       baseHttp.headers = { ...baseHttp.headers, token };
       const result = await this.customFecth.request(baseHttp);
-      if (result.data.messageAlert) {
-        toast.success(result.data.messageAlert);
+      if (result.data.message) {
+        toast.success(result.data.message);
       }
       return [undefined, result.data as T];
     } catch (error) {
       if (error instanceof AxiosError) {
-        const errorMsg: string = error.response?.data?.messageAlert
-          ? (error.response?.data.messageAlert as string)
+        const errorMsg: string = error.response?.data?.message
+          ? (error.response?.data.message as string)
           : 'Internal error try later';
         toast.error(errorMsg);
       } else {
