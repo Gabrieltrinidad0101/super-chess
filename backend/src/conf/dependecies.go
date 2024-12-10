@@ -11,7 +11,7 @@ type Conf struct {
 	playerModel   model.PlayerModel
 }
 
-var conf *Conf
+var conf = &Conf{}
 
 func Init() *Conf {
 	return conf

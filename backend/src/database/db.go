@@ -34,7 +34,6 @@ func GetConnection() *gorm.DB {
 		conf.DbUser,
 		conf.DbPassword,
 		conf.DbName,
-		conf.DbPort,
 	)
 
 	gormDB, err := gorm.Open(postgres.Open(dsn))
